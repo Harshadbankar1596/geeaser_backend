@@ -11,7 +11,7 @@ const admin_Order_Controller = {
         payment_status: { $in: ["paid", "cod"] },
       })
         .populate("user_id", "name contact")
-        .populate("address_id", "address")
+        .populate("address_id", "address pincode")
         .populate(
           "products.product_id",
           "productname category description quantity images howToUse highlights price"
