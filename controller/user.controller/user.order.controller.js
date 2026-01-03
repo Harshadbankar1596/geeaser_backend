@@ -129,73 +129,6 @@ const user_Order_Controller = {
       return res.status(500).json({ error: error.message });
     }
   },
-  // async verifyOrder(req, res) {
-  //   try {
-  //     const {
-  //       razorpay_order_id,
-  //       razorpay_payment_id,
-  //       razorpay_signature,
-  //       order_id,
-  //     } = req.body;
-
-  //     if (
-  //       !razorpay_order_id ||
-  //       !razorpay_payment_id ||
-  //       !razorpay_signature ||
-  //       !order_id
-  //     ) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         message: "All Razorpay payment fields are required",
-  //       });
-  //     }
-
-  //     const isOrderExists = await OrderModel.findOne({
-  //       _id: order_id,
-  //       paymentMethod: "online",
-  //       payment_status: "pending",
-  //     });
-
-  //     if (!isOrderExists) {
-  //       return res.status(400).json({ message: "Order does not exists" });
-  //     }
-
-  //     const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
-  //     const expectedSign = crypto
-  //       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-  //       .update(sign)
-  //       .digest("hex");
-
-  //     if (expectedSign !== razorpay_signature) {
-  //       await OrderModel.findByIdAndDelete(order_id);
-  //       return res.status(400).json({
-  //         message: "Payment verification failed, Order removed",
-  //       });
-  //     }
-
-  //     await OrderModel.findByIdAndUpdate(order_id, {
-  //       payment_status: "paid",
-  //       razorpay_order_id,
-  //       razorpay_payment_id,
-  //       razorpay_signature,
-  //     });
-
-  //     const removedCart = await CartModel.findOneAndDelete({
-  //       user_id: order.user_id,
-  //     });
-
-  //     if (!removedCart) {
-  //       console.warn("Cart not found while clearing after payment");
-  //     }
-  //     return res.status(200).json({
-  //       success: true,
-  //       message: "Payment verified successfully",
-  //     });
-  //   } catch (error) {
-  //     // await OrderModel.findByIdAndDelete(order_id);
-  //     return res.status(500).json({ error: error.message });
-  //   }
-  // },
 
   async verifyOrder(req, res) {
     try {
@@ -206,7 +139,6 @@ const user_Order_Controller = {
         order_id,
       } = req.body;
 
-      // ✅ Validation
       if (
         !razorpay_order_id ||
         !razorpay_payment_id ||
@@ -219,28 +151,16 @@ const user_Order_Controller = {
         });
       }
 
-      // ✅ Fetch order
-      const order = await OrderModel.findOne({
+      const isOrderExists = await OrderModel.findOne({
         _id: order_id,
         paymentMethod: "online",
+        payment_status: "pending",
       });
 
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order does not exist",
-        });
+      if (!isOrderExists) {
+        return res.status(400).json({ message: "Order does not exists" });
       }
 
-      // ✅ Prevent double verification
-      if (order.payment_status === "paid") {
-        return res.status(200).json({
-          success: true,
-          message: "Payment already verified",
-        });
-      }
-
-      // ✅ Verify Razorpay signature
       const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
       const expectedSign = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -248,17 +168,12 @@ const user_Order_Controller = {
         .digest("hex");
 
       if (expectedSign !== razorpay_signature) {
-        await OrderModel.findByIdAndUpdate(order_id, {
-          payment_status: "failed",
-        });
-
+        await OrderModel.findByIdAndDelete(order_id);
         return res.status(400).json({
-          success: false,
-          message: "Payment verification failed",
+          message: "Payment verification failed, Order removed",
         });
       }
 
-      // ✅ Mark order as paid
       await OrderModel.findByIdAndUpdate(order_id, {
         payment_status: "paid",
         razorpay_order_id,
@@ -266,9 +181,8 @@ const user_Order_Controller = {
         razorpay_signature,
       });
 
-     
       const removedCart = await CartModel.findOne({
-        user_id: order.user_id,
+        user_id: isOrderExists.user_id,
       });
 
       if (!removedCart) {
@@ -284,13 +198,104 @@ const user_Order_Controller = {
         message: "Payment verified successfully",
       });
     } catch (error) {
-      console.error("verifyOrder error:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+      // await OrderModel.findByIdAndDelete(order_id);
+      return res.status(500).json({ error: error.message });
     }
   },
+
+  // async verifyOrder(req, res) {
+  //   try {
+  //     const {
+  //       razorpay_order_id,
+  //       razorpay_payment_id,
+  //       razorpay_signature,
+  //       order_id,
+  //     } = req.body;
+
+  //     // ✅ Validation
+  //     if (
+  //       !razorpay_order_id ||
+  //       !razorpay_payment_id ||
+  //       !razorpay_signature ||
+  //       !order_id
+  //     ) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "All Razorpay payment fields are required",
+  //       });
+  //     }
+
+  //     // ✅ Fetch order
+  //     const order = await OrderModel.findOne({
+  //       _id: order_id,
+  //       paymentMethod: "online",
+  //     });
+
+  //     if (!order) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: "Order does not exist",
+  //       });
+  //     }
+
+  //     // ✅ Prevent double verification
+  //     if (order.payment_status === "paid") {
+  //       return res.status(200).json({
+  //         success: true,
+  //         message: "Payment already verified",
+  //       });
+  //     }
+
+  //     // ✅ Verify Razorpay signature
+  //     const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
+  //     const expectedSign = crypto
+  //       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+  //       .update(sign)
+  //       .digest("hex");
+
+  //     if (expectedSign !== razorpay_signature) {
+  //       await OrderModel.findByIdAndUpdate(order_id, {
+  //         payment_status: "failed",
+  //       });
+
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Payment verification failed",
+  //       });
+  //     }
+
+  //     // ✅ Mark order as paid
+  //     await OrderModel.findByIdAndUpdate(order_id, {
+  //       payment_status: "paid",
+  //       razorpay_order_id,
+  //       razorpay_payment_id,
+  //       razorpay_signature,
+  //     });
+
+  //     const removedCart = await CartModel.findOne({
+  //       user_id: order.user_id,
+  //     });
+
+  //     if (!removedCart) {
+  //       console.warn("Cart not found while clearing after payment");
+  //     } else {
+  //       removedCart.products = [];
+  //       await removedCart.save();
+  //       console.log("cart deleted");
+  //     }
+
+  //     return res.status(200).json({
+  //       success: true,
+  //       message: "Payment verified successfully",
+  //     });
+  //   } catch (error) {
+  //     console.error("verifyOrder error:", error);
+  //     return res.status(500).json({
+  //       success: false,
+  //       message: "Internal server error",
+  //     });
+  //   }
+  // },
 };
 
 export default user_Order_Controller;
