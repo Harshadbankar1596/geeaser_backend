@@ -4,7 +4,7 @@ import OrderModel from "../../models/order.model.js";
 import mongoose from "mongoose";
 import AddressModel from "../../models/address.model.js";
 import coupenModel from "../../models/coupen.model.js";
-import cartModel from "../../models/cart.model.js";
+import CartModel from "../../models/cart.model.js";
 
 const razorpayInstance = getRazorpayInstance();
 const user_Order_Controller = {
@@ -109,6 +109,15 @@ const user_Order_Controller = {
           payment_status: "cod",
         });
 
+        let rmcart = await CartModel.findOne({ user_id: orderInDb.user_id });
+
+        if (!rmcart) {
+          console.log("Cart not found for user");
+        } else {
+          rmcart.products = [];
+          await rmcart.save(); 
+        }
+
         return res.status(201).json({
           message: "COD order created successfully",
           orderInDb,
@@ -171,7 +180,7 @@ const user_Order_Controller = {
         razorpay_signature,
       });
 
-      await cartModel.findOneAndDelete({user_id :isOrderExists.user_id })
+      await CartModel.findOneAndDelete({ user_id: isOrderExists.user_id });
 
       return res.status(200).json({
         success: true,
