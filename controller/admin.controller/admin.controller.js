@@ -1,7 +1,8 @@
 import AdminService from "../../service/admin.service/admin.service.js";
 import CategoryModel from "../../models/category.model.js";
 import ProductModel from "../../models/product.model.js";
-
+import uploadTheImage from "../../utils/cloudinary.js";
+import fs from "fs"
 const DATA_ALLOWED = [
   "productname",
   "description",
@@ -33,7 +34,7 @@ const AdminController = {
   },
   EditCategory: async (req, res) => {
     try {
-      const { id } = req.params; 
+      const { id } = req.params;
       const { name } = req.body;
 
       const category = await CategoryModel.findById(id);
@@ -49,10 +50,9 @@ const AdminController = {
       }
 
       if (req.file?.path) {
-        const uploadedImage = await AdminService.UploadCategoryImage(
-          req.file.path
-        );
-        category.image = uploadedImage;
+        const uploadedImage = await uploadTheImage(req.file.path);
+        category.image = uploadedImage?.secure_url;
+        fs.unlinkSync(req.file?.path);
       }
 
       await category.save();
