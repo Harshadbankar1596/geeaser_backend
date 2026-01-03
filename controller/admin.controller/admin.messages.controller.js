@@ -7,7 +7,7 @@ const admin_Messages_Controller = {
         if(!admin){
             return res.status(401).json({message : "Admin is not valid"});
         }
-        const messagesLele = await messagesModel.find({});
+        const messagesLele = await messagesModel.find();
         return res.status(200).json({message : "Success", data : messagesLele});
     } catch (error) {
       return res.status(500).json({ error: error.message });

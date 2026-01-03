@@ -4,6 +4,7 @@ import upload from "../../middleware/multer.js"
 const router = express.Router()
 
 router.post("/add-category" ,upload.single("image"), AdminController.AddCategory)
+router.patch("/edit-category/:id" ,upload.single("image"), AdminController.AddCategory)
 router.delete("/delete-category/:cat_id" ,upload.single("image"), AdminController.deleteCategory)
 router.post("/add-product" , upload.array("images") , AdminController.AddProduct)
 router.patch("/update-product/:product_id" , upload.array("images") , AdminController.Updateproduct)

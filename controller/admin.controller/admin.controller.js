@@ -31,6 +31,45 @@ const AdminController = {
       res.status(500).json({ error: error?.message });
     }
   },
+  EditCategory: async (req, res) => {
+    try {
+      const { id } = req.params; 
+      const { name } = req.body;
+
+      const category = await CategoryModel.findById(id);
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          message: "Category not found",
+        });
+      }
+
+      if (name) {
+        category.name = name;
+      }
+
+      if (req.file?.path) {
+        const uploadedImage = await AdminService.UploadCategoryImage(
+          req.file.path
+        );
+        category.image = uploadedImage;
+      }
+
+      await category.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Category updated successfully",
+        category,
+      });
+    } catch (error) {
+      console.error("Edit Category Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
   AddProduct: async (req, res) => {
     try {
       if (!req.files) {
@@ -136,7 +175,6 @@ const AdminController = {
       return res.status(500).json({ error: error.message });
     }
   },
-  
 
   deleteCategory: async (req, res) => {
     try {

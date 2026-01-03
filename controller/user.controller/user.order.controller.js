@@ -4,6 +4,7 @@ import OrderModel from "../../models/order.model.js";
 import mongoose from "mongoose";
 import AddressModel from "../../models/address.model.js";
 import coupenModel from "../../models/coupen.model.js";
+import cartModel from "../../models/cart.model.js";
 
 const razorpayInstance = getRazorpayInstance();
 const user_Order_Controller = {
@@ -169,6 +170,8 @@ const user_Order_Controller = {
         razorpay_payment_id,
         razorpay_signature,
       });
+
+      await cartModel.findOneAndDelete({user_id :isOrderExists.user_id })
 
       return res.status(200).json({
         success: true,
