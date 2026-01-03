@@ -7,13 +7,14 @@ const user_Address_Controller = {
       if (!user) {
         return res.status(401).json({ error: "User is not valid " });
       }
-      const { address } = req.body;
-      if (!address) {
+      const { address , pincode} = req.body;
+      if (!address || !pincode) {
         return res.status(400).json({ error: "All fields are required" });
       }
       const addressAdded = new AddressModel({
         user_id: user._id,
         address,
+        pincode
       });
       await addressAdded.save();
       return res.status(201).json({ message: "Address Added", addressAdded });
