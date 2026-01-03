@@ -91,6 +91,22 @@ const AdminAuth = {
       res.status(500).json({ error: error?.message });
     }
   },
+
+  LogoutAdmin: async (req, res) => {
+    try {
+      res.clearCookie("token");
+      return res.status(200).json({
+        success: true,
+        message: "Admin logout successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed",
+        error: error.message,
+      });
+    }
+  },
 };
 
 export default AdminAuth;

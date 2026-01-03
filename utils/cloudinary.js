@@ -20,8 +20,19 @@ const uploadTheImage = (filePath) => {
       filePath,
       { folder: "techsuryafolder", resource_type: "auto" },
       (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
+        if (err) {
+          if (err.message?.includes("Invalid image file")) {
+            return reject(new Error("Invalid image file"));
+          }
+
+          if (err.message?.includes("format")) {
+            return reject(new Error("Only png, jpg, jpeg formats are allowed"));
+          }
+
+          return reject(new Error(err.message));
+        }
+
+        resolve(result);
       }
     );
   });

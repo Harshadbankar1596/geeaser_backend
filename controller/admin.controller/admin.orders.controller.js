@@ -1,7 +1,5 @@
 import OrderModel from "../../models/order.model.js";
 
-
-
 const admin_Order_Controller = {
   async getAllOrders(req, res) {
     try {
@@ -14,7 +12,10 @@ const admin_Order_Controller = {
       })
         .populate("user_id", "name contact")
         .populate("address_id", "address")
-        .populate("products.product_id", "productname category description quantity images howToUse highlights price");
+        .populate(
+          "products.product_id",
+          "productname category description quantity images howToUse highlights price"
+        );
       return res.status(200).json({ message: "Success", data: orders });
     } catch (error) {
       return res.status(500).json({ error: error.message });

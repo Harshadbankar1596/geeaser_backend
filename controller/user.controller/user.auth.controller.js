@@ -11,7 +11,7 @@ const UserAuth = {
         return res.status(400).json({ error: "All fields are required" });
       }
 
-      let user = await UserModel.findOne({ contact, name });
+      let user = await UserModel.findOne({ contact });
       let isNewUser = false;
 
       if (!user) {
@@ -24,11 +24,11 @@ const UserAuth = {
       });
 
       res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "none",
-      secure: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       // res.cookie("token", token, {
       //   httpOnly: true,
@@ -48,6 +48,21 @@ const UserAuth = {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: error.message });
+    }
+  },
+  LogoutUser: async (req, res) => {
+    try {
+      res.clearCookie("token");
+
+      return res.status(200).json({
+        success: true,
+        message: "Logout successful",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   },
 };
