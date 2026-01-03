@@ -45,7 +45,6 @@ const user_Order_Controller = {
 
       const isAddressExists = await AddressModel.findOne({
         _id: address_id,
-        user_id: user._id,
       });
 
       if (!isAddressExists) {
@@ -116,6 +115,7 @@ const user_Order_Controller = {
         } else {
           rmcart.products = [];
           await rmcart.save();
+          console.log("cart deleted");
         }
 
         return res.status(201).json({
@@ -266,13 +266,17 @@ const user_Order_Controller = {
         razorpay_signature,
       });
 
-      // ✅ Remove cart safely
-      const removedCart = await CartModel.findOneAndDelete({
+     
+      const removedCart = await CartModel.findOne({
         user_id: order.user_id,
       });
 
       if (!removedCart) {
         console.warn("Cart not found while clearing after payment");
+      } else {
+        removedCart.products = [];
+        await removedCart.save();
+        console.log("cart deleted");
       }
 
       return res.status(200).json({
