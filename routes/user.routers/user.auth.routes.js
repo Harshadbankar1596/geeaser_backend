@@ -3,7 +3,6 @@ import UserAuth from "../../controller/user.controller/user.auth.controller.js"
 
 const router = express.Router()
 
-router.post("/register-user" , UserAuth.RegisterUser)
-router.post("/login-user" , UserAuth.LoginUser)
+router.post("/auth" , UserAuth.AuthUser)
 
 export default router

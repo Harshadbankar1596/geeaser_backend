@@ -5,21 +5,9 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
       trim: true,
+      maxLength: 30,
     },
-
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      lowercase: true,
-      trim: true,
-      validate: {
-        validator: (value) => validator.isEmail(value),
-        message: "Please enter a valid email address",
-      },
-    },
-
     contact: {
       type: String,
       required: [true, "Contact number is required"],
@@ -28,27 +16,10 @@ const UserSchema = new mongoose.Schema(
         message: "Please enter a valid 10-digit mobile number",
       },
     },
-
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      validate: {
-        validator: (value) =>
-          validator.isStrongPassword(value, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1,
-          }),
-        message:
-          "Password must be strong (8 chars, upper, lower, number, symbol)",
-      },
-    },
   },
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
+// UserSchema.index({ email: 1 });
 
 export default mongoose.model("User", UserSchema);
